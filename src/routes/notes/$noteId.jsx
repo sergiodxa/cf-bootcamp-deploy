@@ -62,5 +62,5 @@ export async function action({ request }) {
   let { searchParams } = new URL(request.url);
   let formData = await request.formData();
   await deleteNote(formData.get("id"));
-  return redirect(`/notes?${searchParams}`);
+  return redirect(`/?${searchParams}`);
 }

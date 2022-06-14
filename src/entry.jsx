@@ -16,7 +16,11 @@ seedNotes().then(() => {
     <StrictMode>
       <DataBrowserRouter>
         <Route element={<Root />}>
-          <Route element={<NotesLayout />} path="/" loader={notesLayoutLoader}>
+          <Route
+            element={<NotesLayout />}
+            path="notes"
+            loader={notesLayoutLoader}
+          >
             <Route element={<h1>Pick a note at the left</h1>} index />
             <Route element={<NoteForm />} path="new" action={noteFormAction} />
             <Route

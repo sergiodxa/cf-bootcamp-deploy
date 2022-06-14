@@ -38,5 +38,5 @@ export async function action({ request }) {
   let { searchParams } = new URL(request.url);
   let formData = await request.formData();
   let { id } = await createNote(formData.get("title"), formData.get("body"));
-  return redirect(`/${id}?${searchParams}`);
+  return redirect(`/notes/${id}?${searchParams}`);
 }

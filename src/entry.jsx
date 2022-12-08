@@ -39,8 +39,6 @@ function lazyAction(factory) {
   };
 }
 
-await seedNotes();
-
 const router = createBrowserRouter([
   {
     element: <Root />,
@@ -77,10 +75,12 @@ const router = createBrowserRouter([
   },
 ]);
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Suspense fallback={<Spinner />}>
-      <RouterProvider router={router} fallbackElement={<Spinner />} />
-    </Suspense>
-  </StrictMode>
-);
+seedNotes().then(() => {
+  return createRoot(document.getElementById("root")).render(
+    <StrictMode>
+      <Suspense fallback={<Spinner />}>
+        <RouterProvider router={router} fallbackElement={<Spinner />} />
+      </Suspense>
+    </StrictMode>
+  );
+})

@@ -1,18 +1,20 @@
+import { Suspense } from "react";
 import { Outlet, useNavigation } from "react-router-dom";
-import "./styles/global.css";
+import { Spinner } from "./components/spinner";
 
 export default function Root() {
-  let navigation = useNavigation();
+  let { state } = useNavigation();
 
   return (
     <main>
       <header>
-        <h1>codigofacilito Bootcamp React - Clase de Deploy a Vercel</h1>
+        <h1>codigofacilito Bootcamp React - Clase de React Router</h1>
       </header>
-      <Outlet />
-      {navigation.state !== "idle" && (
-        <p style={{ position: "fixed", top: 16, right: 16 }}>Loading...</p>
-      )}
+
+      {state !== "idle" ? <Spinner /> : null}
+      <Suspense fallback={<Spinner />}>
+        <Outlet />
+      </Suspense>
     </main>
   );
 }

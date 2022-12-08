@@ -1,29 +1,60 @@
+import { Suspense } from "react";
 import {
   Form,
   json,
   Link,
+  NavLink,
   Outlet,
   useLoaderData,
   useLocation,
   useSearchParams,
+  useSubmit,
 } from "react-router-dom";
+import { Spinner } from "../components/spinner";
 import { getAllNotes } from "../models/notes";
 
+export async function loader({ request }) {
+  let notes = await getAllNotes();
+
+  let url = new URL(request.url);
+
+  let sort = url.searchParams.get("sort") ?? "id";
+  let dir = url.searchParams.get("dir") ?? "desc";
+
+  let sorted = [...notes].sort((noteA, noteB) => {
+    if (sort in noteA) {
+      if (dir === "desc") return noteA[sort].localeCompare(noteB[sort]);
+      else return noteB[sort].localeCompare(noteA[sort]);
+    } else {
+      if (dir === "desc") return noteA.id.localeCompare(noteB.id);
+      else return noteB.id.localeCompare(noteA.id);
+    }
+  });
+
+  return json(sorted);
+}
+
 export default function NotesLayout() {
-  /**
-   * @type {Record<string, import("./models/notes").Note[]>}
-   */
-  let { notes } = useLoaderData();
-  let [searchParams] = useSearchParams();
+  let notes = useLoaderData();
   let { pathname } = useLocation();
+  let [searchParams] = useSearchParams();
+  let submit = useSubmit();
+
+  let sort = searchParams.get("sort") ?? "id";
+  let dir = searchParams.get("dir") ?? "desc";
 
   return (
     <section>
       <nav>
-        <Form method="get" action={pathname}>
+        <Form
+          action={pathname}
+          onChange={(event) => {
+            submit(event.currentTarget, { action: pathname });
+          }}
+        >
           <label>
             Sort by:
-            <select name="sort" defaultValue={searchParams.get("sort")}>
+            <select name="sort" defaultValue={sort}>
               <option value="id">ID</option>
               <option value="title">Title</option>
               <option value="body">Body</option>
@@ -33,7 +64,7 @@ export default function NotesLayout() {
 
           <label>
             Direction:
-            <select name="dir" defaultValue={searchParams.get("dir")}>
+            <select name="dir" defaultValue={dir}>
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
@@ -50,40 +81,24 @@ export default function NotesLayout() {
           {notes.map((note) => {
             return (
               <li key={note.id}>
-                <Link to={`${note.id}?${searchParams}`}>{note.title}</Link>
+                <NavLink to={`${note.id}?${searchParams}`}>
+                  {note.title}
+                </NavLink>
               </li>
             );
           })}
+
+          <li>
+            <button onClick={() => setNoteId("RANDOM")}>
+              Not found example
+            </button>
+          </li>
         </ul>
       </nav>
 
-      <Outlet />
+      <Suspense fallback={<Spinner />}>
+        <Outlet />
+      </Suspense>
     </section>
   );
-}
-
-/**
- *
- * @param {import("@remix-run/router/utils").DataFunctionArgs} args
- * @returns
- */
-export async function loader({ request }) {
-  let { searchParams } = new URL(request.url);
-  let sort = searchParams.get("sort") || "id";
-  let dir = searchParams.get("dir") || "desc";
-
-  let notes = await getAllNotes();
-
-  let sorted = notes.sort((noteA, noteB) => {
-    if (sort in noteA) {
-      if (dir === "desc") {
-        return noteA[sort].localeCompare(noteB[sort]);
-      } else return noteB[sort].localeCompare(noteA[sort]);
-    } else {
-      if (dir === "desc") return noteA.id.localeCompare(noteB.id);
-      else return noteB.id.localeCompare(noteA.id);
-    }
-  });
-
-  return json({ notes: sorted });
 }

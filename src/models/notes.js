@@ -1,5 +1,7 @@
 import { getItem, setItem } from "localforage";
 import { notes as seedData } from "../data/notes";
+import { fakeNetwork } from "../utils/sleep";
+
 const KEY = "notes";
 
 /**
@@ -14,17 +16,6 @@ export function generateId() {
   return crypto.randomUUID();
 }
 
-/**
- * @param {number} ms
- * @returns {Promise<void>}
- */
-let sleep = () => {
-  return new Promise((resolve) => {
-    let ms = Math.round(Math.random() * 100);
-    setTimeout(resolve, ms);
-  });
-};
-
 export async function seedNotes() {
   /** @type {Note[] | null} */
   let notes = await getItem(KEY);
@@ -37,7 +28,7 @@ export async function seedNotes() {
  * @returns {Promise<Note[]>}
  */
 export async function getAllNotes() {
-  await sleep();
+  await fakeNetwork();
   /** @type {Note[] | null} */
   let storedValue = await getItem(KEY);
   return storedValue ?? [];
@@ -49,7 +40,7 @@ export async function getAllNotes() {
  * @returns {Promise<Note> | Promise<null>}
  */
 export async function getNoteById(id) {
-  await sleep();
+  await fakeNetwork();
   let notes = await getAllNotes();
   let note = notes.find((note) => note.id === id);
   if (!note) return null;
@@ -63,7 +54,7 @@ export async function getNoteById(id) {
  * @returns {Promise<Note>}
  */
 export async function createNote(title, body) {
-  await sleep();
+  await fakeNetwork();
   let id = generateId();
   let createdAt = new Date().toISOString();
 
@@ -84,8 +75,28 @@ export async function createNote(title, body) {
  * @returns {Promise<void>}
  */
 export async function deleteNote(id) {
-  await sleep();
+  await fakeNetwork();
   let notes = await getAllNotes();
   let filteredNotes = notes.filter((note) => note.id !== id);
   setItem(KEY, filteredNotes);
+}
+
+/**
+ * Updates a note by ID
+ * @param {string} id The ID of the note to update
+ * @param {string} title The new title of the note
+ * @param {string} body The new body of the note
+ * @returns {Promise<Note>}
+ */
+export async function updateNote(id, title, body) {
+  await fakeNetwork();
+  let notes = await getAllNotes();
+  let updatedNotes = notes.map((note) => {
+    if (note.id !== id) return note;
+    note.title = title;
+    note.body = body;
+    return note;
+  });
+  setItem(KEY, updatedNotes);
+  return updatedNotes.find((note) => note.id === id);
 }

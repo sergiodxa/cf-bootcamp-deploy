@@ -8,7 +8,7 @@ export default function Root() {
   return (
     <main>
       <header>
-        <h1>codigofacilito Bootcamp React - Clase de React Router</h1>
+        <h1>codigofacilito Bootcamp React - Clase de Deploy a Vercel</h1>
       </header>
 
       {state !== "idle" ? <Spinner /> : null}

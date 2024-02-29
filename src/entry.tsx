@@ -10,7 +10,17 @@ import { createMessage } from "./models/messages";
 import { App } from "./app";
 import data from "./data";
 
-if (localStorage.getItem("mocked") !== "true") {
+mockData().then(() => {
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+});
+
+async function mockData() {
+  if (localStorage.getItem("mocked") === "true") return;
+
   for await (let user of data.users) await createUsers(user.name, user.avatar);
 
   let users = await listUsers();
@@ -28,9 +38,3 @@ if (localStorage.getItem("mocked") !== "true") {
 
   localStorage.setItem("mocked", "true");
 }
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
